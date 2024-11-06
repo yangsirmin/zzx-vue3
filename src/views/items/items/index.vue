@@ -10,9 +10,9 @@
         />
       </el-form-item>
       <el-form-item label="物品种类" prop="category">
-          <el-select v-model="queryParams.category" placeholder="请选择物品种类" clearable>
-            <el-option v-for="item in categories" :key="item.id" :label="item.categoryName" :value="item.categoryName"></el-option>
-          </el-select>
+        <el-select v-model="queryParams.category" placeholder="请选择物品种类" clearable>
+          <el-option v-for="item in categories" :key="item.id" :label="item.categoryName" :value="item.categoryName"></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item label="领取地点" prop="locationFound">
         <el-select v-model="queryParams.locationFound" placeholder="请选择领取地点" clearable>
@@ -65,21 +65,12 @@
           v-hasPermi="['items:items:remove']"
         >删除</el-button>
       </el-col>
-      <!-- <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['items:items:export']"
-        >导出</el-button>
-      </el-col> -->
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="itemsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="物品ID，自动增长" align="center" prop="id" />
+      <el-table-column label="物品ID" align="center" prop="id" />
       <el-table-column label="物品名称" align="center" prop="itemName" />
       <el-table-column label="物品种类" align="center" prop="category" />
       <el-table-column label="物品描述" align="center" prop="description" />
@@ -106,7 +97,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -347,3 +338,25 @@ getAllLocations();
 getAllCategories();
 getList();
 </script>
+
+
+
+<style scoped>
+  .app-container {
+    padding: 20px;
+  }
+
+  .mb8 {
+    margin-bottom: 8px;
+  }
+
+  .dialog-footer {
+    text-align: right;
+  }
+
+  .el-table .cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
