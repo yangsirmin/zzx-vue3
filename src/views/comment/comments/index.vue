@@ -14,7 +14,7 @@
             </h4>
             <p>{{ item.content }}</p>
             <div class="button-container" >
-              <el-button ink type="primary" icon="Delete" @click="handleDelete(item)" v-hasPermi="['items:items:remove']">删除</el-button>
+              <el-button ink type="primary" icon="Delete" @click="handleDelete(item)" v-hasPermi="['comment:comments:remove']">删除</el-button>
             </div>
           </el-card>
         </el-timeline-item>
