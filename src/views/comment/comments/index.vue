@@ -1,76 +1,26 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <el-card>
+      <div slot="header" class="clearfix">
+        <span>用户评论</span>
+        <el-button style="float: right; padding: 3px 0" type="text" @click="handleAdd">评论</el-button>
+      </div>
+      <el-timeline>
+        <el-timeline-item v-for="item in commentList" :key="item.id" :timestamp="item.createdAt" placement="top">
+          <el-card>
+            <h4>
+              <el-avatar :src="item.avatar"></el-avatar>
+              {{ item.nikeName }} 说:
+            </h4>
+            <p>{{ item.content }}</p>
+            <div class="button-container" >
+              <el-button ink type="primary" icon="Delete" @click="handleDelete(item)" v-hasPermi="['items:items:remove']">删除</el-button>
+            </div>
+          </el-card>
+        </el-timeline-item>
+      </el-timeline>
+    </el-card>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['comment:comments:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['comment:comments:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['comment:comments:remove']"
-        >删除</el-button>
-      </el-col>
-      <!-- <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['comment:comments:export']"
-        >导出</el-button>
-      </el-col> -->
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
-
-    <el-table v-loading="loading" :data="commentsList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="序号" align="center" prop="id" />
-      <el-table-column label="评论内容" align="center" prop="content" />
-      <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.createdAt, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="更新时间" align="center" prop="updatedAt" width="180">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.updatedAt, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['comment:comments:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['comment:comments:remove']">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    
     <pagination
       v-show="total>0"
       :total="total"
@@ -79,11 +29,11 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改用户评论对话框 -->
+    <!-- 添加评论对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="commentsRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="评论内容">
-          <editor v-model="form.content" :min-height="192"/>
+      <el-form ref="commentRef" :model="form" label-width="80px">
+        <el-form-item label="评论内容" prop="content">
+          <el-input type="textarea" v-model="form.content" :rows="4" placeholder="请输入评论内容"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -93,15 +43,15 @@
         </div>
       </template>
     </el-dialog>
-  </div>
+  </div> 
 </template>
 
-<script setup name="Comments">
-import { listComments, getComments, delComments, addComments, updateComments } from "@/api/comment/comments";
+<script setup name="Comment">
+import { listComment, getComment, delComment, addComment, updateComment } from "@/api/comment/comments";
 
 const { proxy } = getCurrentInstance();
 
-const commentsList = ref([]);
+const commentList = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -117,11 +67,12 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     content: null,
+    createdAt: null,
+    updatedAt: null,
+    nikeName: null,
+    avatar: null, 
   },
   rules: {
-    content: [
-      { required: true, message: "评论内容不能为空", trigger: "blur" }
-    ],
   }
 });
 
@@ -130,8 +81,8 @@ const { queryParams, form, rules } = toRefs(data);
 /** 查询用户评论列表 */
 function getList() {
   loading.value = true;
-  listComments(queryParams.value).then(response => {
-    commentsList.value = response.rows;
+  listComment(queryParams.value).then(response => {
+    commentList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
@@ -147,13 +98,12 @@ function cancel() {
 function reset() {
   form.value = {
     id: null,
-    itemId: null,
     content: null,
     createdAt: null,
     updatedAt: null,
     userId: null
   };
-  proxy.resetForm("commentsRef");
+  proxy.resetForm("commentRef");
 }
 
 /** 搜索按钮操作 */
@@ -179,14 +129,14 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加用户评论";
+  title.value = "评论";
 }
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset();
   const _id = row.id || ids.value
-  getComments(_id).then(response => {
+  getComment(_id).then(response => {
     form.value = response.data;
     open.value = true;
     title.value = "修改用户评论";
@@ -195,16 +145,16 @@ function handleUpdate(row) {
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["commentsRef"].validate(valid => {
+  proxy.$refs["commentRef"].validate(valid => {
     if (valid) {
       if (form.value.id != null) {
-        updateComments(form.value).then(response => {
+        updateComment(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
           getList();
         });
       } else {
-        addComments(form.value).then(response => {
+        addComment(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
@@ -218,7 +168,7 @@ function submitForm() {
 function handleDelete(row) {
   const _ids = row.id || ids.value;
   proxy.$modal.confirm('是否确认删除用户评论编号为"' + _ids + '"的数据项？').then(function() {
-    return delComments(_ids);
+    return delComment(_ids);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
@@ -227,10 +177,26 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('comment/comments/export', {
+  proxy.download('comment/comment/export', {
     ...queryParams.value
-  }, `comments_${new Date().getTime()}.xlsx`)
+  }, `comment_${new Date().getTime()}.xlsx`)
 }
 
 getList();
 </script>
+
+<style scoped>
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+.clearfix:after {
+  clear: both;
+}
+
+.button-container {
+  text-align: right;
+  margin-top: 10px;
+}
+</style>

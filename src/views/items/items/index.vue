@@ -14,13 +14,10 @@
             <el-option v-for="item in categories" :key="item.id" :label="item.categoryName" :value="item.categoryName"></el-option>
           </el-select>
       </el-form-item>
-      <el-form-item label="发现地点" prop="locationFound">
-        <el-input
-          v-model="queryParams.locationFound"
-          placeholder="请输入发现地点"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+      <el-form-item label="领取地点" prop="locationFound">
+        <el-select v-model="queryParams.locationFound" placeholder="请选择领取地点" clearable>
+          <el-option v-for="item in locations" :key="item.id" :label="item.name" :value="item.name"></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item label="物品状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择物品状态" clearable>
@@ -132,8 +129,10 @@
         <el-form-item label="物品描述" prop="description">
           <el-input v-model="form.description" type="textarea" placeholder="请输入内容" />
         </el-form-item>
-        <el-form-item label="发现地点" prop="locationFound">
-          <el-input v-model="form.locationFound" placeholder="请输入发现地点" />
+        <el-form-item label="领取地点" prop="locationFound">
+          <el-select v-model="form.locationFound" placeholder="请选择领取地点" clearable>
+            <el-option v-for="item in locations" :key="item.id" :label="item.name" :value="item.name"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="发现日期" prop="dateFound">
           <el-date-picker clearable
@@ -170,6 +169,7 @@
 <script setup name="Items">
 import { listItems, getItems, delItems, addItems, updateItems } from "@/api/items/items";
 import { listCategories } from "@/api/categories/categories"
+import { listLocations } from "@/api/locations/locations";
 
 const { proxy } = getCurrentInstance();
 const { tb_items } = proxy.useDict('tb_items');
@@ -307,7 +307,7 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除物品管理编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除此物品的数据？').then(function() {
     return delItems(_ids);
   }).then(() => {
     getList();
@@ -332,6 +332,18 @@ function getAllCategories(){
     categories.value = response.rows;
   });
 }
+
+const locations=ref([]);
+function getAllLocations(){
+  listLocations({
+    pageNum: 1,
+    pageSize: 100
+  }).then(response => {
+    locations.value = response.rows;
+  });
+}
+
+getAllLocations();
 getAllCategories();
 getList();
 </script>
