@@ -9,6 +9,15 @@ export function listItems(query) {
   })
 }
 
+//查询用户物品管理列表
+export function listUserItems(query) {
+  return request({
+    url: '/items/items/user/list',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询物品管理详细
 export function getItems(id) {
   return request({
