@@ -70,7 +70,7 @@
 
     <el-table v-loading="loading" :data="itemsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="物品ID" align="center" prop="id" />
+      <el-table-column label="序号" type="index" width="50" align="center" prop="id" />
       <el-table-column label="物品名称" align="center" prop="itemName" />
       <el-table-column label="物品种类" align="center" prop="category" />
       <el-table-column label="物品描述" align="center" prop="description" />

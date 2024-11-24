@@ -6,8 +6,11 @@
         <p>
           一款帮助人们更方便的寻找到丢失物的平台。
         </p>
+        <p>提供了网页端及移动端，移动端可在源码地址中下载安装包。</p>
         <p>
-          <b>当前版本:</b> <span>v{{ version }}</span>
+          <b>源码地址：</b> <a href="https://github.com/yangsirmin/zzx.git">https://github.com/yangsirmin/zzx.git</a>
+          <br>
+          <b>当前版本：</b> <span>v{{ version }}</span>
         </p>
       </el-col>
 
